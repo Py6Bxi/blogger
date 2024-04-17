@@ -1,9 +1,16 @@
-!function(i) {
-  var e$$1 = {
-    init : function(e$$0) {
-      var t = {
+!function($) {
+  var app = {
+    /**
+     * @param {?} config
+     * @return {?}
+     */
+    init : function(config) {
+      var options = {
         timer : null,
         timerSeconds : 10,
+        /**
+         * @return {undefined}
+         */
         callback : function() {
         },
         timerCurrent : 0,
@@ -11,82 +18,104 @@
         fill : false,
         color : "#CCC"
       };
-      return t = i.extend(t, e$$0), this.each(function() {
-        var e = i(this);
-        if (!e.data("pietimer")) {
-          e.addClass("pietimer");
-          e.css({
-            fontSize : e.width()
+      return options = $.extend(options, config), this.each(function() {
+        var element = $(this);
+        if (!element.data("pietimer")) {
+          element.addClass("pietimer");
+          element.css({
+            fontSize : element.width()
           });
-          e.data("pietimer", t);
-          if (t.showPercentage) {
-            e.find(".percent").show();
+          element.data("pietimer", options);
+          if (options.showPercentage) {
+            element.find(".percent").show();
           }
-          if (t.fill) {
-            e.addClass("fill");
+          if (options.fill) {
+            element.addClass("fill");
           }
-          e.pietimer("start");
+          element.pietimer("start");
         }
       });
     },
+    /**
+     * @return {undefined}
+     */
     stopWatch : function() {
-      var e = i(this).data("pietimer");
-      if (e) {
-        var t = (e.timerFinish - (new Date).getTime()) / 1E3;
-        if (t <= 0) {
-          clearInterval(e.timer);
-          i(this).pietimer("drawTimer", 100);
-          e.callback();
+      var self = $(this).data("pietimer");
+      if (self) {
+        /** @type {number} */
+        var scale = (self.timerFinish - (new Date).getTime()) / 1E3;
+        if (scale <= 0) {
+          clearInterval(self.timer);
+          $(this).pietimer("drawTimer", 100);
+          self.callback();
         } else {
-          var r = 100 - t / e.timerSeconds * 100;
-          i(this).pietimer("drawTimer", r);
+          /** @type {number} */
+          var r20 = 100 - scale / self.timerSeconds * 100;
+          $(this).pietimer("drawTimer", r20);
         }
       }
     },
-    drawTimer : function(e) {
-      $this = i(this);
-      var t = $this.data("pietimer");
-      if (t) {
-        $this.html('<div class="percent"></div><div class="slice' + (e > 50 ? ' gt50"' : '"') + '><div class="pie"></div>' + (e > 50 ? '<div class="pie fill"></div>' : "") + "</div>");
-        var r = 3.6 * e;
+    /**
+     * @param {number} i
+     * @return {undefined}
+     */
+    drawTimer : function(i) {
+      $this = $(this);
+      var options = $this.data("pietimer");
+      if (options) {
+        $this.html('<div class="percent"></div><div class="slice' + (i > 50 ? ' gt50"' : '"') + '><div class="pie"></div>' + (i > 50 ? '<div class="pie fill"></div>' : "") + "</div>");
+        /** @type {number} */
+        var n = 3.6 * i;
         $this.find(".slice .pie").css({
-          "-moz-transform" : "rotate(" + r + "deg)",
-          "-webkit-transform" : "rotate(" + r + "deg)",
-          "-o-transform" : "rotate(" + r + "deg)",
-          transform : "rotate(" + r + "deg)"
+          "-moz-transform" : "rotate(" + n + "deg)",
+          "-webkit-transform" : "rotate(" + n + "deg)",
+          "-o-transform" : "rotate(" + n + "deg)",
+          transform : "rotate(" + n + "deg)"
         });
-        $this.find(".percent").html(Math.round(e) + "%");
-        if (t.showPercentage) {
+        $this.find(".percent").html(Math.round(i) + "%");
+        if (options.showPercentage) {
           $this.find(".percent").show();
         }
         if ($this.hasClass("fill")) {
           $this.find(".slice .pie").css({
-            backgroundColor : t.color
+            backgroundColor : options.color
           });
         } else {
           $this.find(".slice .pie").css({
-            borderColor : t.color
+            borderColor : options.color
           });
         }
       }
     },
+    /**
+     * @return {undefined}
+     */
     start : function() {
-      var e = i(this).data("pietimer");
-      if (e) {
-        e.timerFinish = (new Date).getTime() + 1E3 * e.timerSeconds;
-        i(this).pietimer("drawTimer", 0);
-        e.timer = setInterval("$this.pietimer('stopWatch')", 50);
+      var timer = $(this).data("pietimer");
+      if (timer) {
+        /** @type {number} */
+        timer.timerFinish = (new Date).getTime() + 1E3 * timer.timerSeconds;
+        $(this).pietimer("drawTimer", 0);
+        /** @type {number} */
+        timer.timer = setInterval("$this.pietimer('stopWatch')", 50);
       }
     },
+    /**
+     * @return {undefined}
+     */
     reset : function() {
-      var e = i(this).data("pietimer");
-      if (e) {
-        clearInterval(e.timer);
-        i(this).pietimer("drawTimer", 0);
+      var iv = $(this).data("pietimer");
+      if (iv) {
+        clearInterval(iv.timer);
+        $(this).pietimer("drawTimer", 0);
       }
     }
   };
-  i.fn.pietimer = function(t) {
-    return e$$1[t] ? e$$1[t].apply(this, Array.prototype.slice.call(arguments, 1)) : "object" != typeof t && t ? void i.error("Method " + t + " does not exist on jQuery.pietimer") : e$$1.init.apply(this, arguments);
+  /**
+   * @param {Object} prop
+   * @return {?}
+   */
+  $.fn.pietimer = function(prop) {
+    return app[prop] ? app[prop].apply(this, Array.prototype.slice.call(arguments, 1)) : "object" != typeof prop && prop ? void $.error("Method " + prop + " does not exist on jQuery.pietimer") : app.init.apply(this, arguments);
   };
 }(jQuery);
