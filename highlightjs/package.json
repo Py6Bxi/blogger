@@ -1,6 +1,6 @@
 {
-  "name": "highlight.js",
-  "description": "Syntax highlighting with language autodetection.",
+  "name": "@highlightjs/cdn-assets",
+  "description": "Syntax highlighting with language autodetection. (pre-compiled CDN assets)",
   "keywords": [
     "highlight",
     "syntax"
@@ -29,9 +29,6 @@
     "type": "git",
     "url": "git://github.com/highlightjs/highlight.js.git"
   },
-  "type": "commonjs",
-  "main": "./lib/index.js",
-  "types": "./types/index.d.ts",
   "sideEffects": [
     "./es/common.js",
     "./lib/common.js",
