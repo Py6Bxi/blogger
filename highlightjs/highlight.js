@@ -1,5 +1,5 @@
-$('i[rel="pre"]').replaceWith(function() { return $('<pre><code>' + $(this).html() + '</code></pre>'); });
 /*!
+  SundayUser.blogspot.com
   Highlight.js v11.9.0 (git: f47103d4f1)
   (c) 2006-2023 undefined and other contributors
   License: BSD-3-Clause
