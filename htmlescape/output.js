@@ -1,4 +1,3 @@
-<script>
 	$(function() {
 		$('#saveToDisk').click(event => {
 			const blob = new Blob([$('#output').text()], {type: "text/plain;charset=utf-8"});
@@ -15,4 +14,3 @@
 		$('#escapeBtn').click(escape);
 		$('#unescapeBtn').click(unescape);
 	});
-</script>
