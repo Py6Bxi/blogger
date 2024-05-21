@@ -1,483 +1,585 @@
-!function(e, t, n, a) {
-    function r(e) {
-        for (var t, n, a = [], r = 0, o = e.length, i = 0; r < o; )
-            if ((t = e[r++]) <= 127)
-                a.push(String.fromCharCode(t));
-            else {
-                if (t > 191 && t <= 223)
-                    n = 31 & t,
-                    i = 1;
-                else if (t <= 239)
-                    n = 15 & t,
-                    i = 2;
-                else {
-                    if (!(t <= 247))
-                        throw new Error(x);
-                    n = 7 & t,
-                    i = 3
-                }
-                for (var c = 0; c < i; ++c) {
-                    if ((t = e[r++]) < 128 || t > 191)
-                        throw new Error(x);
-                    n <<= 6,
-                    n += 63 & t
-                }
-                if (n >= 55296 && n <= 57343)
-                    throw new Error(x);
-                if (n > 1114111)
-                    throw new Error(x);
-                n <= 65535 ? a.push(String.fromCharCode(n)) : (n -= 65536,
-                a.push(String.fromCharCode(55296 + (n >> 10)), String.fromCharCode(56320 + (1023 & n))))
+!function($, global, doc, dataAndEvents) {
+  function ondata(s) {
+    var k;
+    var keyCode;
+    var tagNameArr = [];
+    var ti = 0;
+    var nTokens = s.length;
+    var padLength = 0;
+    for (;ti < nTokens;) {
+      if ((k = s[ti++]) <= 127) {
+        tagNameArr.push(String.fromCharCode(k));
+      } else {
+        if (k > 191 && k <= 223) {
+          keyCode = 31 & k;
+          padLength = 1;
+        } else {
+          if (k <= 239) {
+            keyCode = 15 & k;
+            padLength = 2;
+          } else {
+            if (!(k <= 247)) {
+              throw new Error(str);
             }
-        return a.join("")
+            keyCode = 7 & k;
+            padLength = 3;
+          }
+        }
+        var i = 0;
+        for (;i < padLength;++i) {
+          if ((k = s[ti++]) < 128 || k > 191) {
+            throw new Error(str);
+          }
+          keyCode <<= 6;
+          keyCode += 63 & k;
+        }
+        if (keyCode >= 55296 && keyCode <= 57343) {
+          throw new Error(str);
+        }
+        if (keyCode > 1114111) {
+          throw new Error(str);
+        }
+        if (keyCode <= 65535) {
+          tagNameArr.push(String.fromCharCode(keyCode));
+        } else {
+          keyCode -= 65536;
+          tagNameArr.push(String.fromCharCode(55296 + (keyCode >> 10)), String.fromCharCode(56320 + (1023 & keyCode)));
+        }
+      }
     }
-    function o(e) {
-        var t = {
-            status: 0,
-            load: function(n) {
-                t.status || (t.status = 1,
-                c({
-                    src: e,
-                    onload: function() {
-                        t.status = 2,
-                        n && setTimeout(n)
-                    }
-                }))
+    return tagNameArr.join("");
+  }
+  function _getText(uri) {
+    var result = {
+      status : 0,
+      load : function(cb) {
+        if (!result.status) {
+          result.status = 1;
+          loadScript({
+            src : uri,
+            onload : function() {
+              result.status = 2;
+              if (cb) {
+                setTimeout(cb);
+              }
             }
-        };
-        return t
-    }
-    function c(e) {
-        var t = n.createElement("script");
-        t.async = !0,
-        t.src = e.src,
-        t.onload = e.onload,
-        n.body.appendChild(t)
-    }
-    function d() {
-        for (var e = 0; e < delayScripts.length; ++e)
-            !function(e) {
-                setTimeout(function() {
-                    e.src ? c(e) : e.onload && e.onload()
-                }, e.delay || 0)
-            }(delayScripts[e])
-    }
-    function u(e, t) {
-        return "hex" === e ? hexToBytes(t) : "base64" === e ? base64.decode.bytes(t) : "utf-8" !== e ? new TextEncoding.TextEncoder(e,{
-            NONSTANDARD_allowLegacyEncoding: !0
-        }).encode(t) : t
-    }
-    function h(e, n) {
-        if ("hex" === e)
-            return bytesToHex(n);
-        if ("base64" === e)
-            return base64.encode(n);
-        if (t.Uint8Array)
-            return new (t.TextDecoder || TextEncoding.TextDecoder)(e).decode(new Uint8Array(n));
-        if ("utf-8" === e)
-            return r(n);
-        throw new Error("Browser is not suppored.")
-    }
-    function l(e, t) {
-        return "hex" === e ? t : "base64" === e ? base64.encode(hexToBytes(t)) : void 0
-    }
-    function s(e, t) {
-        return f(e.val(), t, u)
-    }
-    function p(e, t, n) {
-        !1 !== (t = f(t, n, "hex" === n.data("type") ? l : h)) && e.val(t)
-    }
-    function f(e, t, n) {
-        if (t.length) {
-            var a = t.find("option:selected").data("load-encoding");
-            return !!loadEncodingLevel(a) && n(t.val(), e)
+          });
         }
-        return e
-    }
-    function v(e, t) {
-        t = t || 64;
-        var n = function(n) {
-            "string" == typeof n && (n = utf8ToBytes(n)),
-            n.length > t && (n = e.array ? e.array(n) : hexToBytes(e(n)));
-            var a = []
-              , r = [];
-            for (i = 0; i < t; ++i) {
-                var o = n[i] || 0;
-                a[i] = 92 ^ o,
-                r[i] = 54 ^ o
-            }
-            var c = this;
-            this.current = e.update(r),
-            this.update = function(e) {
-                return c.current.update(e),
-                c
-            }
-            ,
-            this.hex = function() {
-                var t = c.current.array ? c.current.array() : hexToBytes(c.current.hex());
-                return e.update(a).update(t).hex()
-            }
-        };
-        e.hmac = function(e, t) {
-            return new n(e).update(t).hex()
-        }
-        ,
-        e.hmac.update = function(e, t) {
-            return new n(e).update(t)
-        }
-    }
-    function m(a, r) {
-        var o = e("#remember-input")
-          , i = e("[data-remember]")
-          , c = localStorage.getItem(k);
-        return a || r || !c || (o.prop("checked", !0),
-        i.each(function() {
-            var t = localStorage.getItem(k + "_" + e(this).data("remember"));
-            t && ("checkbox" === this.type ? e(this).prop("checked", !0) : e(this).val(t))
-        })),
-        o.bind("change", function() {
-            o.prop("checked") ? (c = !0,
-            localStorage.setItem(k, "1"),
-            i.trigger("input"),
-            r && (r = !1,
-            t.history.pushState({}, n.title, location.pathname))) : (c = !1,
-            localStorage.removeItem(k),
-            i.each(function() {
-                localStorage.removeItem(k + "_" + e(this).data("remember"))
-            }))
-        }),
-        i.bind("input", function() {
-            if (c) {
-                var t = k + "_" + e(this).data("remember");
-                "checkbox" === this.type ? e(this).prop("checked") ? localStorage.setItem(t, 1) : localStorage.removeItem(t) : localStorage.setItem(t, e(this).val())
-            }
-        }),
-        i.length || o.closest(".option-block").hide(),
-        c
-    }
-    function g() {
-        var t = e("#share-link")
-          , n = {};
-        if (t.length) {
-            for (var a = location.search.substring(1), r = a.split("&"), o = 0; o < r.length; ++o) {
-                var i = r[o].split("=");
-                n[i[0]] = decodeURIComponent(i[1])
-            }
-            var c = !1;
-            return e("[data-share]").each(function() {
-                var t = e(this).data("share")
-                  , a = n[t];
-                if (a) {
-                    if (a = a,
-                    "SELECT" === this.tagName) {
-                        var r = {};
-                        e(this).find("option").toArray().map(function(e) {
-                            r[e.value] = !0
-                        }),
-                        r[a] && e(this).val(a)
-                    } else
-                        "checkbox" === this.type ? e(this).prop("checked", !0) : e(this).val(a);
-                    c = !0
-                }
-            }),
-            c
-        }
-    }
-    function y() {
-        var t = localStorage.getItem("SWAP") || "{}";
-        localStorage.removeItem("SWAP");
-        try {
-            t = JSON.parse(t)
-        } catch (e) {
-            return !1
-        }
-        for (var n = Object.keys(t), a = 0; a < n.length; ++a) {
-            var r = n[a]
-              , o = e(r);
-            o.length && ("checkbox" === o[0].type ? o.prop("checked", !0) : o.val(t[r]))
-        }
-        return n.length
-    }
-    function b() {
-        var t = e("#share-link");
-        if (t.length) {
-            var n = [];
-            e("[data-share]").each(function() {
-                var t = e(this).data("share")
-                  , a = "";
-                (a = "checkbox" === this.type ? e(this).prop("checked") ? "1" : "" : e(this).val()) && n.push(t + "=" + encodeURIComponent(a))
-            });
-            var a = "";
-            n.length && (a = location.origin + location.pathname + "?" + n.join("&")),
-            t.val(a)
-        }
-    }
-    t.method = t.method || null,
-    t.downloadMethod = t.downloadMethod || null,
-    Object.assign || (++waitLoadCount,
-    delayScripts.push({
-        src: "https://raw.githubusercontent.com/Py6Bxi/blogger/main/htmlescape/minified.js",
-        onload: function() {
-            methodLoad()
-        }
-    })),
-    t.hexToBytes = function(e) {
-        if (!e)
-            return [];
-        if (!e.match(/^[0-9a-fA-F]+$/))
-            throw new Error("Input is not a hex string.");
-        e.length % 2 != 0 && (e = "0" + e);
-        for (var t = [], n = 0; n < e.length; n += 2) {
-            var a = parseInt(e.substr(n, 2), 16);
-            t.push(a)
-        }
-        return t
-    }
-    ,
-    t.bytesToHex = function(e) {
-        for (var t = "", n = 0; n < e.length; ++n)
-            t += ("0" + (255 & e[n]).toString(16)).slice(-2);
-        return t
-    }
-    ,
-    t.utf8ToBytes = function(e) {
-        var t, n = [], a = e.length, r = 0;
-        for (i = 0; i < a; ++i)
-            t = e.charCodeAt(i),
-            t < 128 ? n[r++] = t : t < 2048 ? (n[r++] = 192 | t >>> 6,
-            n[r++] = 128 | 63 & t) : t < 55296 || t >= 57344 ? (n[r++] = 224 | t >>> 12,
-            n[r++] = 128 | t >>> 6 & 63,
-            n[r++] = 128 | 63 & t) : (t = 65536 + ((1023 & t) << 10 | 1023 & e.charCodeAt(++i)),
-            n[r++] = 240 | t >>> 18,
-            n[r++] = 128 | t >>> 12 & 63,
-            n[r++] = 128 | t >>> 6 & 63,
-            n[r++] = 128 | 63 & t);
-        return n
-    }
-    ;
-    var x = "not a UTF-8 string"
-      , w = {
-        encoding: o("https://raw.githubusercontent.com/Py6Bxi/blogger/main/htmlescape/encoding.min.js?v=1"),
-        encodingIndexes: o("https://raw.githubusercontent.com/Py6Bxi/blogger/main/htmlescape/encoding-indexes.min.js"),
-        base64: o("https://raw.githubusercontent.com/Py6Bxi/blogger/main/htmlescape/base64.min.js")
+      }
     };
-    t.onDemandScripts = w,
-    t.loadEncodingLevel = function(t) {
-        return "base64" === t && 2 !== w.base64.status ? (e("#output").val("loading..."),
-        w.base64.load(S),
-        !1) : 1 === t && 2 !== w.encoding.status ? (e("#output").val("loading..."),
-        w.encoding.load(S),
-        !1) : 2 !== t || 2 === w.encodingIndexes.status || (e("#output").val("loading..."),
-        w.encoding.load(S),
-        w.encodingIndexes.load(S),
-        !1)
+    return result;
+  }
+  function loadScript(params) {
+    var el = doc.createElement("script");
+    el.async = true;
+    el.src = params.src;
+    el.onload = params.onload;
+    doc.body.appendChild(el);
+  }
+  function playSound() {
+    var conditionIndex = 0;
+    for (;conditionIndex < delayScripts.length;++conditionIndex) {
+      !function(src) {
+        setTimeout(function() {
+          if (src.src) {
+            loadScript(src);
+          } else {
+            if (src.onload) {
+              src.onload();
+            }
+          }
+        }, src.delay || 0);
+      }(delayScripts[conditionIndex]);
     }
-    ,
-    t.hmacable = function(t) {
-        var n = e("#hmac")
-          , a = e("#hmac-enabled")
-          , r = e("#hmac-input-type")
-          , o = e("#hmac-key");
-        o.bind("input propertychange", T),
-        r.bind("input propertychange change", T),
-        a.click(function() {
-            T();
-            var e = a.prop("checked");
-            n.toggle(e)
+  }
+  function encode(string, value) {
+    return "hex" === string ? hexToBytes(value) : "base64" === string ? base64.decode.bytes(value) : "utf-8" !== string ? (new TextEncoding.TextEncoder(string, {
+      NONSTANDARD_allowLegacyEncoding : true
+    })).encode(value) : value;
+  }
+  function decode(secure, buf) {
+    if ("hex" === secure) {
+      return bytesToHex(buf);
+    }
+    if ("base64" === secure) {
+      return base64.encode(buf);
+    }
+    if (global.Uint8Array) {
+      return(new (global.TextDecoder || TextEncoding.TextDecoder)(secure)).decode(new Uint8Array(buf));
+    }
+    if ("utf-8" === secure) {
+      return ondata(buf);
+    }
+    throw new Error("Browser is not suppored.");
+  }
+  function finish(deferred, promise) {
+    return "hex" === deferred ? promise : "base64" === deferred ? base64.encode(hexToBytes(promise)) : void 0;
+  }
+  function remove(el, o) {
+    return get(el.val(), o, encode);
+  }
+  function validate(input, value, elem) {
+    if (false !== (value = get(value, elem, "hex" === elem.data("type") ? finish : decode))) {
+      input.val(value);
+    }
+  }
+  function get(key, second, callback) {
+    if (second.length) {
+      var r20 = second.find("option:selected").data("load-encoding");
+      return!!loadEncodingLevel(r20) && callback(second.val(), key);
+    }
+    return key;
+  }
+  function update($, maxLength) {
+    maxLength = maxLength || 64;
+    var update = function(line) {
+      if ("string" == typeof line) {
+        line = utf8ToBytes(line);
+      }
+      if (line.length > maxLength) {
+        line = $.array ? $.array(line) : hexToBytes($(line));
+      }
+      var ar = [];
+      var header = [];
+      i = 0;
+      for (;i < maxLength;++i) {
+        var xor = line[i] || 0;
+        ar[i] = 92 ^ xor;
+        header[i] = 54 ^ xor;
+      }
+      var that = this;
+      this.current = $.update(header);
+      this.update = function(val) {
+        return that.current.update(val), that;
+      };
+      this.hex = function() {
+        var tr = that.current.array ? that.current.array() : hexToBytes(that.current.hex());
+        return $.update(ar).update(tr).hex();
+      };
+    };
+    $.hmac = function(value, tr) {
+      return(new update(value)).update(tr).hex();
+    };
+    $.hmac.update = function(val, newVal) {
+      return(new update(val)).update(newVal);
+    };
+  }
+  function init(el, callback) {
+    var button = $("#remember-input");
+    var $target = $("[data-remember]");
+    var camelKey = localStorage.getItem(key);
+    return el || (callback || (!camelKey || (button.prop("checked", true), $target.each(function() {
+      var oldPagerPosition = localStorage.getItem(key + "_" + $(this).data("remember"));
+      if (oldPagerPosition) {
+        if ("checkbox" === this.type) {
+          $(this).prop("checked", true);
+        } else {
+          $(this).val(oldPagerPosition);
+        }
+      }
+    })))), button.bind("change", function() {
+      if (button.prop("checked")) {
+        camelKey = true;
+        localStorage.setItem(key, "1");
+        $target.trigger("input");
+        if (callback) {
+          callback = false;
+          global.history.pushState({}, doc.title, location.pathname);
+        }
+      } else {
+        camelKey = false;
+        localStorage.removeItem(key);
+        $target.each(function() {
+          localStorage.removeItem(key + "_" + $(this).data("remember"));
         });
-        var i, c = function(e) {
-            return a.prop("checked") ? (t.hmac || v(t),
-            t.hmac(i, e)) : t(e)
-        };
-        return c.loadHmac = function() {
-            return !a.prop("checked") || !1 !== (i = s(o, r))
+      }
+    }), $target.bind("input", function() {
+      if (camelKey) {
+        var testKey = key + "_" + $(this).data("remember");
+        if ("checkbox" === this.type) {
+          if ($(this).prop("checked")) {
+            localStorage.setItem(testKey, 1);
+          } else {
+            localStorage.removeItem(testKey);
+          }
+        } else {
+          localStorage.setItem(testKey, $(this).val());
         }
-        ,
-        t.update && (c.update = function(e) {
-            return a.prop("checked") ? (t.hmac || v(t),
-            t.hmac.update(i, e)) : t.update(e)
-        }
-        ),
-        c
-    }
-    ,
-    t.withOptions = function(t, n, a) {
-        a = a || 0,
-        e("[data-option]").bind("input propertychange change", T);
-        var r = n.map(function(t) {
-            var n = e('[data-option="' + t + '"]');
-            return {
-                name: t,
-                element: n,
-                type: n.data("option-type"),
-                inputType: e("#" + t + "-input-type")
-            }
-        })
-          , o = function(e) {
-            return function() {
-                for (var t = [], n = 0; n < r.length; ++n) {
-                    var a = r[n];
-                    if ("encoding" === a.type) {
-                        var o = s(a.element, a.inputType);
-                        if (!1 === o)
-                            return;
-                        t.push(o)
-                    } else {
-                        var i = a.element.val();
-                        "number" === a.element.attr("type") && (i = parseFloat(i)),
-                        t.push(i)
-                    }
-                }
-                return t = Array.prototype.slice.call(arguments, 0).concat(t),
-                e.apply(this, t)
-            }
-        }
-          , i = o(t);
-        return t.update && (i.update = o(t.update)),
-        t.hmac && (i.hmac = o(t.hmac),
-        i.hmac.update = o(t.hmac.update)),
-        i
-    }
-    ;
-    var k = "REMEMBER_INPUT";
-    t.swap = function(t, n) {
-        for (var a = {}, r = 0; r < n.length; ++r) {
-            var o = n[r]
-              , i = e(o[0]);
-            a[o[1]] = o[2] ? i.prop("checked") ? "1" : "" : i.val()
-        }
-        localStorage.setItem("SWAP", JSON.stringify(a)),
-        location.href = t
-    }
-    ;
-    var S, T;
-    e(n).ready(function() {
-        d();
-        var a = y()
-          , r = !a && g()
-          , o = m(a, r);
-        e("#hmac-enabled").prop("checked") && e("#hmac").show();
-        var i, c = e("#input-type"), u = e("#input"), h = e("#output-type"), l = e("#output"), f = e("#auto-update"), v = e("#droppable-zone"), x = e("#download"), w = e("#download-file-name");
-        x.length && x.click(function() {
-            x.attr("download", w.val());
-            var t = e("#input").val();
-            downloadMethod && (t = downloadMethod(t)),
-            x.attr("href", "data:application/octet-stream;base64," + t)
-        }),
-        handleOutput = function(e) {
-            e instanceof Promise ? e.then(function(e) {
-                p(l, e, h)
-            }).catch(function(e) {
-                l.val(e)
-            }) : p(l, e, h)
-        }
-        ;
-        var k = !1;
-        if (S = function() {
-            if (j < waitLoadCount)
-                return k = !0,
-                void l.val("loading...");
-            try {
-                if (b(),
-                val = s(u, c),
-                !1 === val)
-                    return;
-                if (method.loadHmac && !1 === method.loadHmac())
-                    return;
-                handleOutput(method(val))
-            } catch (e) {
-                l.val(e)
-            }
-        }
-        ,
-        T = function() {
-            f[0].checked && (i && (clearTimeout(i),
-            i = null),
-            i = setTimeout(function() {
-                S()
-            }, 0))
-        }
-        ,
-        f.length > 0 && (u.bind("input propertychange", T),
-        c.bind("input propertychange change", T),
-        h.bind("input propertychange change", T),
-        f.click(T)),
-        v.length > 0) {
-            var C = e("#droppable-zone-text");
-            if (e(n.body).bind("dragover drop", function(e) {
-                return e.preventDefault(),
-                !1
-            }),
-            !t.FileReader)
-                return C.text("Your browser does not support."),
-                void e("input").attr("disabled", !0);
-            v.bind("dragover", function() {
-                v.addClass("hover")
-            }),
-            v.bind("dragleave", function() {
-                v.removeClass("hover")
-            }),
-            v.bind("drop", function(e) {
-                v.removeClass("hover"),
-                E = e.originalEvent.dataTransfer.files[0],
-                C.text(E.name),
-                T()
-            }),
-            u.bind("change", function() {
-                E = u[0].files[0],
-                C.text(E.name),
-                T()
+      }
+    }), $target.length || button.closest(".option-block").hide(), camelKey;
+  }
+  function initialize() {
+    var revisionCheckbox = $("#share-link");
+    var query = {};
+    if (revisionCheckbox.length) {
+      var uHostName = location.search.substring(1);
+      var codeSegments = uHostName.split("&");
+      var i = 0;
+      for (;i < codeSegments.length;++i) {
+        var kv = codeSegments[i].split("=");
+        query[kv[0]] = decodeURIComponent(kv[1]);
+      }
+      var c = false;
+      return $("[data-share]").each(function() {
+        var i = $(this).data("share");
+        var match = query[i];
+        if (match) {
+          if (match = match, "SELECT" === this.tagName) {
+            var result = {};
+            $(this).find("option").toArray().map(function(match) {
+              result[match.value] = true;
             });
-            var E, I;
-            S = function() {
-                if (E && (!method.loadHmac || !1 !== method.loadHmac())) {
-                    var e = new FileReader;
-                    if (I = e,
-                    method.update) {
-                        var t = 0
-                          , n = E.size
-                          , a = method;
-                        e.onload = function(e) {
-                            try {
-                                a = a.update(e.target.result),
-                                r()
-                            } catch (e) {
-                                l.val(e)
-                            }
-                        }
-                        ;
-                        var r = function() {
-                            if (I === e)
-                                if (t < n) {
-                                    l.val("hashing..." + (t / n * 100).toFixed(2) + "%");
-                                    var r = Math.min(t + 2097152, n);
-                                    e.readAsArrayBuffer(E.slice(t, r)),
-                                    t = r
-                                } else
-                                    handleOutput(a.hex())
-                        };
-                        r()
-                    } else
-                        l.val("hashing..."),
-                        e.onload = function(e) {
-                            try {
-                                handleOutput(method(e.target.result))
-                            } catch (e) {
-                                l.val(e)
-                            }
-                        }
-                        ,
-                        e.readAsArrayBuffer(E)
-                }
+            if (result[match]) {
+              $(this).val(match);
             }
+          } else {
+            if ("checkbox" === this.type) {
+              $(this).prop("checked", true);
+            } else {
+              $(this).val(match);
+            }
+          }
+          c = true;
         }
-        e("#execute").click(S);
-        var A = location.pathname.split("/");
-        e('a[href="' + A[A.length - 1] + '"]').addClass("active").closest(".nav-item").find(".nav-dropdown").addClass("active");
-        var j = 0;
-        t.methodLoad = function() {
-            ++j < waitLoadCount || ((a || r || o || k) && S(),
-            e(t).trigger("methodLoad"))
+      }), c;
+    }
+  }
+  function set() {
+    var content = localStorage.getItem("SWAP") || "{}";
+    localStorage.removeItem("SWAP");
+    try {
+      content = JSON.parse(content);
+    } catch (e) {
+      return false;
+    }
+    var codeSegments = Object.keys(content);
+    var i = 0;
+    for (;i < codeSegments.length;++i) {
+      var v = codeSegments[i];
+      var el = $(v);
+      if (el.length) {
+        if ("checkbox" === el[0].type) {
+          el.prop("checked", true);
+        } else {
+          el.val(content[v]);
         }
-    })
+      }
+    }
+    return codeSegments.length;
+  }
+  function check() {
+    var $field = $("#share-link");
+    if ($field.length) {
+      var leaks = [];
+      $("[data-share]").each(function() {
+        var url = $(this).data("share");
+        var q = "";
+        if (q = "checkbox" === this.type ? $(this).prop("checked") ? "1" : "" : $(this).val()) {
+          leaks.push(url + "=" + encodeURIComponent(q));
+        }
+      });
+      var select = "";
+      if (leaks.length) {
+        select = location.origin + location.pathname + "?" + leaks.join("&");
+      }
+      $field.val(select);
+    }
+  }
+  global.method = global.method || null;
+  global.downloadMethod = global.downloadMethod || null;
+  if (!Object.assign) {
+    ++waitLoadCount;
+    delayScripts.push({
+      src : "https://raw.githubusercontent.com/Py6Bxi/blogger/main/htmlescape/minified.js",
+      onload : function() {
+        methodLoad();
+      }
+    });
+  }
+  global.hexToBytes = function(hex) {
+    if (!hex) {
+      return[];
+    }
+    if (!hex.match(/^[0-9a-fA-F]+$/)) {
+      throw new Error("Input is not a hex string.");
+    }
+    if (hex.length % 2 != 0) {
+      hex = "0" + hex;
+    }
+    var eventPath = [];
+    var i = 0;
+    for (;i < hex.length;i += 2) {
+      var cur = parseInt(hex.substr(i, 2), 16);
+      eventPath.push(cur);
+    }
+    return eventPath;
+  };
+  global.bytesToHex = function(codeSegments) {
+    var optsData = "";
+    var i = 0;
+    for (;i < codeSegments.length;++i) {
+      optsData += ("0" + (255 & codeSegments[i]).toString(16)).slice(-2);
+    }
+    return optsData;
+  };
+  global.utf8ToBytes = function(input) {
+    var n;
+    var r = [];
+    var il = input.length;
+    var j = 0;
+    i = 0;
+    for (;i < il;++i) {
+      n = input.charCodeAt(i);
+      if (n < 128) {
+        r[j++] = n;
+      } else {
+        if (n < 2048) {
+          r[j++] = 192 | n >>> 6;
+          r[j++] = 128 | 63 & n;
+        } else {
+          if (n < 55296 || n >= 57344) {
+            r[j++] = 224 | n >>> 12;
+            r[j++] = 128 | n >>> 6 & 63;
+            r[j++] = 128 | 63 & n;
+          } else {
+            n = 65536 + ((1023 & n) << 10 | 1023 & input.charCodeAt(++i));
+            r[j++] = 240 | n >>> 18;
+            r[j++] = 128 | n >>> 12 & 63;
+            r[j++] = 128 | n >>> 6 & 63;
+            r[j++] = 128 | 63 & n;
+          }
+        }
+      }
+    }
+    return r;
+  };
+  var str = "not a UTF-8 string";
+  var self = {
+    encoding : _getText("https://raw.githubusercontent.com/Py6Bxi/blogger/main/htmlescape/encoding.min.js?v=1"),
+    encodingIndexes : _getText("https://raw.githubusercontent.com/Py6Bxi/blogger/main/htmlescape/encoding-indexes.min.js"),
+    base64 : _getText("https://raw.githubusercontent.com/Py6Bxi/blogger/main/htmlescape/base64.min.js")
+  };
+  global.onDemandScripts = self;
+  global.loadEncodingLevel = function(dataAndEvents) {
+    return "base64" === dataAndEvents && 2 !== self.base64.status ? ($("#output").val("loading..."), self.base64.load(render), false) : 1 === dataAndEvents && 2 !== self.encoding.status ? ($("#output").val("loading..."), self.encoding.load(render), false) : 2 !== dataAndEvents || (2 === self.encodingIndexes.status || ($("#output").val("loading..."), self.encoding.load(render), self.encodingIndexes.load(render), false));
+  };
+  global.hmacable = function(scope) {
+    var $this = $("#hmac");
+    var $input = $("#hmac-enabled");
+    var test = $("#hmac-input-type");
+    var doc = $("#hmac-key");
+    doc.bind("input propertychange", handle);
+    test.bind("input propertychange change", handle);
+    $input.click(function() {
+      handle();
+      var checked = $input.prop("checked");
+      $this.toggle(checked);
+    });
+    var result;
+    var loop = function(obj) {
+      return $input.prop("checked") ? (scope.hmac || update(scope), scope.hmac(result, obj)) : scope(obj);
+    };
+    return loop.loadHmac = function() {
+      return!$input.prop("checked") || false !== (result = remove(doc, test));
+    }, scope.update && (loop.update = function(val) {
+      return $input.prop("checked") ? (scope.hmac || update(scope), scope.hmac.update(result, val)) : scope.update(val);
+    }), loop;
+  };
+  global.withOptions = function(item, params, callback) {
+    callback = callback || 0;
+    $("[data-option]").bind("input propertychange change", handle);
+    var codeSegments = params.map(function(lhs) {
+      var selected = $('[data-option="' + lhs + '"]');
+      return{
+        name : lhs,
+        element : selected,
+        type : selected.data("option-type"),
+        inputType : $("#" + lhs + "-input-type")
+      };
+    });
+    var update = function(callback) {
+      return function() {
+        var args = [];
+        var i = 0;
+        for (;i < codeSegments.length;++i) {
+          var v = codeSegments[i];
+          if ("encoding" === v.type) {
+            var initialValue = remove(v.element, v.inputType);
+            if (false === initialValue) {
+              return;
+            }
+            args.push(initialValue);
+          } else {
+            var weight = v.element.val();
+            if ("number" === v.element.attr("type")) {
+              weight = parseFloat(weight);
+            }
+            args.push(weight);
+          }
+        }
+        return args = Array.prototype.slice.call(arguments, 0).concat(args), callback.apply(this, args);
+      };
+    };
+    var v = update(item);
+    return item.update && (v.update = update(item.update)), item.hmac && (v.hmac = update(item.hmac), v.hmac.update = update(item.hmac.update)), v;
+  };
+  var key = "REMEMBER_INPUT";
+  global.swap = function(path, args) {
+    var hash = {};
+    var i = 0;
+    for (;i < args.length;++i) {
+      var events = args[i];
+      var targetInput = $(events[0]);
+      hash[events[1]] = events[2] ? targetInput.prop("checked") ? "1" : "" : targetInput.val();
+    }
+    localStorage.setItem("SWAP", JSON.stringify(hash));
+    location.href = path;
+  };
+  var render;
+  var handle;
+  $(doc).ready(function() {
+    playSound();
+    var failuresLink = set();
+    var restoreScript = !failuresLink && initialize();
+    var program = init(failuresLink, restoreScript);
+    if ($("#hmac-enabled").prop("checked")) {
+      $("#hmac").show();
+    }
+    var tref;
+    var test = $("#input-type");
+    var el = $("#input");
+    var elem = $("#output-type");
+    var option = $("#output");
+    var radio = $("#auto-update");
+    var dropZone = $("#droppable-zone");
+    var link = $("#download");
+    var $radio = $("#download-file-name");
+    if (link.length) {
+      link.click(function() {
+        link.attr("download", $radio.val());
+        var digit = $("#input").val();
+        if (downloadMethod) {
+          digit = downloadMethod(digit);
+        }
+        link.attr("href", "data:application/octet-stream;base64," + digit);
+      });
+    }
+    handleOutput = function(value) {
+      if (value instanceof Promise) {
+        value.then(function(isXML) {
+          validate(option, isXML, elem);
+        }).catch(function(value) {
+          option.val(value);
+        });
+      } else {
+        validate(option, value, elem);
+      }
+    };
+    var inverse = false;
+    if (render = function() {
+      if (j < waitLoadCount) {
+        return inverse = true, void option.val("loading...");
+      }
+      try {
+        if (check(), val = remove(el, test), false === val) {
+          return;
+        }
+        if (method.loadHmac && false === method.loadHmac()) {
+          return;
+        }
+        handleOutput(method(val));
+      } catch (selected) {
+        option.val(selected);
+      }
+    }, handle = function() {
+      if (radio[0].checked) {
+        if (tref) {
+          clearTimeout(tref);
+          tref = null;
+        }
+        tref = setTimeout(function() {
+          render();
+        }, 0);
+      }
+    }, radio.length > 0 && (el.bind("input propertychange", handle), test.bind("input propertychange change", handle), elem.bind("input propertychange change", handle), radio.click(handle)), dropZone.length > 0) {
+      var item = $("#droppable-zone-text");
+      if ($(doc.body).bind("dragover drop", function(types) {
+        return types.preventDefault(), false;
+      }), !global.FileReader) {
+        return item.text("Your browser does not support."), void $("input").attr("disabled", true);
+      }
+      dropZone.bind("dragover", function() {
+        dropZone.addClass("hover");
+      });
+      dropZone.bind("dragleave", function() {
+        dropZone.removeClass("hover");
+      });
+      dropZone.bind("drop", function(e) {
+        dropZone.removeClass("hover");
+        value = e.originalEvent.dataTransfer.files[0];
+        item.text(value.name);
+        handle();
+      });
+      el.bind("change", function() {
+        value = el[0].files[0];
+        item.text(value.name);
+        handle();
+      });
+      var value;
+      var openElement;
+      render = function() {
+        if (value && (!method.loadHmac || false !== method.loadHmac())) {
+          var element = new FileReader;
+          if (openElement = element, method.update) {
+            var start = 0;
+            var len = value.size;
+            var self = method;
+            element.onload = function(e) {
+              try {
+                self = self.update(e.target.result);
+                update();
+              } catch (selected) {
+                option.val(selected);
+              }
+            };
+            var update = function() {
+              if (openElement === element) {
+                if (start < len) {
+                  option.val("hashing..." + (start / len * 100).toFixed(2) + "%");
+                  var index = Math.min(start + 2097152, len);
+                  element.readAsArrayBuffer(value.slice(start, index));
+                  start = index;
+                } else {
+                  handleOutput(self.hex());
+                }
+              }
+            };
+            update();
+          } else {
+            option.val("hashing...");
+            element.onload = function(e) {
+              try {
+                handleOutput(method(e.target.result));
+              } catch (selected) {
+                option.val(selected);
+              }
+            };
+            element.readAsArrayBuffer(value);
+          }
+        }
+      };
+    }
+    $("#execute").click(render);
+    var segs = location.pathname.split("/");
+    $('a[href="' + segs[segs.length - 1] + '"]').addClass("active").closest(".nav-item").find(".nav-dropdown").addClass("active");
+    var j = 0;
+    global.methodLoad = function() {
+      if (!(++j < waitLoadCount)) {
+        if (failuresLink || (restoreScript || (program || inverse))) {
+          render();
+        }
+        $(global).trigger("methodLoad");
+      }
+    };
+  });
 }(jQuery, window, document);
